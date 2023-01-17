@@ -1,0 +1,4 @@
+Gdy klient podłączy się do serwera serwer wysyła wiadomość, 0 - gra trwa czyli uzytkownik musi czekac, w tej sytuacji trzeba zapisac uzytkownika na liscie oczekujacych i
+po skonczeniu gry dopiero wyslac komunikat, 1 - oczekiwanie na gre, wtedy klient odsyla pytanie o czas oczekiwania i liczbe aktualnych graczy
+moze wyslac zapytanie o tresci 1 i serwer odpowie w postaci XYY gdzie X - aktualna liczba graczy a YY to czas w sekundach do rozpoczecia gry, 2 - dolaczyl ostatni gracz i 
+gra rozpoczyna sie. Dalsze flow do przemyslenia. Mozesz pisac propozycje :-)
