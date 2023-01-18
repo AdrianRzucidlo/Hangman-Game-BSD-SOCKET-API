@@ -2,3 +2,12 @@ Gdy klient podłączy się do serwera serwer wysyła wiadomość, 0 - gra trwa c
 po skonczeniu gry dopiero wyslac komunikat, 1 - oczekiwanie na gre, wtedy klient odsyla pytanie o czas oczekiwania i liczbe aktualnych graczy
 moze wyslac zapytanie o tresci 1 i serwer odpowie w postaci XYY gdzie X - aktualna liczba graczy a YY to czas w sekundach do rozpoczecia gry, 2 - dolaczyl ostatni gracz i 
 gra rozpoczyna sie. Dalsze flow do przemyslenia. Mozesz pisac propozycje :-)
+
+
+Propozycja budowy serwera:
+Trzy thready:
+1. Zajmuje sie przyjmowaniem polaczen od graczy, zbiera od nich nicki, wrzuca ich do listy graczy etc.
+
+2. Zajmuje sie gra:
+    2a. Odbierajacy - Przyjmuje od graczy glosy na litery, zapisuje je
+    2b. Wysylajacy - Odlicza czas i po minieciu/przyjsciu wystarczajacej ilosci oblicza wynik i wysyla wszystkim graczom z listy wynik rundy

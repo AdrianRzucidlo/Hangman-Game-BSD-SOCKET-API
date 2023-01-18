@@ -10,6 +10,7 @@ void receiveThread(int sockfd) {
     while (true) {
         char buffer[1024] = {0};
         int valread = read(sockfd, buffer, 1024);
+        if (valread <=0) exit(0);
         if (valread > 0) {
             std::cout << "Received: " << buffer << std::endl;
         }
