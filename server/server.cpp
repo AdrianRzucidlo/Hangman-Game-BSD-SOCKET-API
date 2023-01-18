@@ -13,9 +13,10 @@
 #include <sys/poll.h> 
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <algorithm>
 bool stop = false;
 
-const int PORT = 8080;
+const int PORT = 8090;
 const int MAX_USERS = 10;
 int serverSock;
 
@@ -24,15 +25,15 @@ std::vector<std::string> redNames;
 std::vector<int> bluPlayers;
 std::vector<std::string> bluNames;
 
-void ctrl_c(int){
-    // std::unique_lock<std::mutex> lock(clientFdsLock);
-    // for(int clientFd : clientFds){
-    //     shutdown(clientFd, SHUT_RDWR);
-    //     close(clientFd);
-    // }
-    // close(servFd);
-    // printf("Closing server\n");
-    // exit(0);
+void ctrl_c(int) {
+    close(serverSock);
+    exit(0);
+}
+
+void setReuseAddr(int socket){
+    const int one = 1;
+    int res = setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+    if(res) error(1,errno, "setsockopt failed");
 }
 
 
@@ -43,6 +44,7 @@ void createServer() {
         std::cerr << "Error creating socket" << std::endl;
         exit(1);
     }
+    setReuseAddr(serverSock);
     sockaddr_in address;
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
@@ -57,12 +59,38 @@ void createServer() {
         std::cerr << "Error listening for connections" << std::endl;
         exit(1);
     }
+    
 }
 
 void confirmConnection(int playerFd){
     auto ret = write(playerFd, "100;", 4);
     if(ret==-1) error(1, errno, "write failed on descriptor %d", playerFd);
-    if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%ld)", playerFd, ret, 4);
+    if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, 4);
+    return;
+}
+
+void confirmName(int playerFd, bool accepted = true){
+    if(accepted){
+        auto ret = write(playerFd, "101;", 4);
+        if(ret==-1) error(1, errno, "write failed on descriptor %d", playerFd);
+        if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, 4);
+        return;
+    } else {
+        auto ret = write(playerFd, "401;", 4);
+        if(ret==-1) error(1, errno, "write failed on descriptor %d", playerFd);
+        if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, 4);
+        return;
+    }
+}
+
+bool nameTaken(std::string name){
+    for (int i = 0; i<redNames.size(); ++i){
+        if(name.compare(redNames[i]) == 0) return true;
+    }
+    for (int i = 0; i<bluNames.size(); ++i){
+        if(name.compare(bluNames[i]) == 0) return true;
+    }
+    return false;
 }
 
 void newPlayerHandler(){
@@ -73,22 +101,28 @@ void newPlayerHandler(){
         int ready = poll(playerPoll, 1, -1);
         if(ready == -1){
             error(0, errno, "poll failed");
-            //ctrl_c(SIGINT);  TODO Obsuga zakoczenia wszystkich threadow
         }
 
         if(playerPoll->revents){
             if(playerPoll->revents & ~POLLIN){
                 error(0, errno, "Event %x on server socket", playerPoll->revents);
-                //ctrl_c(SIGINT); TODO Obsuga zakoczenia wszystkich threadow
             }
 
             if(playerPoll->revents & POLLIN){
                 char buffer[128];
-                int newPlayer = accept(serverSock, NULL, NULL); //todo zapisac dane przychodzacego by wyswietlic w konsoli
+                sockaddr_in clientAddr{};
+                socklen_t clientAddrSize = sizeof(clientAddr);
+
+                int newPlayer = accept(serverSock, (sockaddr*) &clientAddr, &clientAddrSize);
                 if(newPlayer == -1) error(1, errno, "accept failed");
 
                 confirmConnection(newPlayer);
-                //std::cout << "New connection from " << newPlayer
+
+                std::cout << "New connection attempt from " << 
+                inet_ntoa(clientAddr.sin_addr) <<":"<< 
+                ntohs(clientAddr.sin_port) << "  FD: " << 
+                newPlayer << std::endl;
+
                 int received = read(newPlayer, buffer, 128);
                 if(received == -1) error(1,errno, "name read failed on descriptor %d", newPlayer);
                 if(received <= 0){
@@ -96,31 +130,45 @@ void newPlayerHandler(){
                     close(newPlayer);
                     continue;
                 }
+                std::string name(buffer);
+                name.erase(std::remove(name.begin(), name.end(), '\n'), name.cend());
+                if(nameTaken(name)){
+                    confirmName(newPlayer, false);
+                    shutdown(newPlayer, SHUT_RDWR);
+                    close(newPlayer);
+                    continue;
+                }
 
                 if(redPlayers.size()>=bluPlayers.size()) {
                     bluPlayers.push_back(newPlayer);
-                    std::string name(buffer);
                     bluNames.push_back(name);
                 } else {
                     redPlayers.push_back(newPlayer);
-                    std::string name(buffer);
                     redNames.push_back(name);
                 }
+
+                confirmName(newPlayer);
             }
         }
     }
 }
 
-void getPlayerName(int playerFd) {
-    char buf[128];
-}
 
 int main()
 {
-    //signal(SIGINT, ctrl_c);
-    //thread for handling connections with players
-    std::thread playerAcceptingthread(newPlayerHandler);
 
+    signal(SIGINT, ctrl_c);
+    createServer();
+    
+    std::thread playerAcceptingthread(newPlayerHandler);
+    std::cout << "test 1\n";
+    while(1){
+        std::cout << "==========\nRed players:\n";
+        for(int i = 0; i < redPlayers.size(); i++) std::cout << redPlayers[i] <<" called " << redNames[i] << std::endl;
+        std::cout << "Blu players:\n";
+        for(int i = 0; i < bluPlayers.size(); i++) std::cout << bluPlayers[i] << " called " << bluNames[i] << std::endl;
+        sleep(5);
+    }
 
     //int epoll_fd = epoll_create(MAX_EVENTS);
 //     if(epoll_fd < 0) 
