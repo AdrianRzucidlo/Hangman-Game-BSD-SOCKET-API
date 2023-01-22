@@ -5,7 +5,7 @@
 
 void newPlayerHandler();
 bool nameTaken(std::string);
-void confirmName(int, bool = true);
+void confirmName(int, char, bool = true);
 void confirmConnection(int);
 
 #endif

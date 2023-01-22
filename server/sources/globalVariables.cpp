@@ -6,8 +6,10 @@
 
 
 #define MAX_PLAYERS_PER_TEAM 32
-const int PORT = 8090;
-const int MAX_USERS = 10;
+#define PORT 8090
+#define MAX_USERS 64;
+// const int PORT = 8090;
+// const int MAX_USERS = 64;
 int serverSock;
 pollfd letterPollRed[MAX_PLAYERS_PER_TEAM];
 pollfd letterPollBlu[MAX_PLAYERS_PER_TEAM];
@@ -18,9 +20,11 @@ std::string phrase;
 
 std::set<char> lettersLeftBlu;
 std::vector<char> lettersGuessedBlu;
+std::vector<char> lettersMissedBlu;
 
 std::set<char> lettersLeftRed;
 std::vector<char> lettersGuessedRed;
+std::vector<char> lettersMissedRed;
 
 std::vector<int> redPlayers;
 std::vector<std::string> redNames;

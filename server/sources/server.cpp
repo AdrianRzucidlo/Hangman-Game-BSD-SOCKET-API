@@ -19,7 +19,7 @@
 #include "../headers/lobby.hh"
 #include "../headers/hangman.hh"
 #include "../headers/globalVariables.hh"
-
+#include "../headers/announceWinner.hh"
 #include <random>
 #include <fstream>
 #include <set>
@@ -39,23 +39,20 @@ int main()
     std::uniform_int_distribution<> distr(0, 212);
 
     signal(SIGINT, ctrl_c);
+    std::cout << "Initializing server...\n";
     createServer();
-    
+    std::cout << "Server created\n";
+    std::cout << "Running connection handling thread...\n";
     std::thread playerAcceptingthread(newPlayerHandler);
-
-    std::cout << "test 1\n";
-    while(1){
-        std::cout << "==========\nRed players:\n";
-        for(int i = 0; i < redPlayers.size(); i++) std::cout << redPlayers[i] <<" called " << redNames[i] << std::endl;
-        std::cout << "Blu players:\n";
-        for(int i = 0; i < bluPlayers.size(); i++) std::cout << bluPlayers[i] << " called " << bluNames[i] << std::endl;
-        sleep(5);
-    }
     
     while(1){
+        std::cout << "Entering lobby...\n";
         lobbyTimer();
-
-        hangman(distr, gen);
+        std::cout << "Starting game...\n";
+        char winner = hangman(distr, gen);
+        (winner=='r') ? std::cout << "Winning team: Red\n" : std::cout << "Winning team: Blue\n";
+        std::cout << "Announcing to players...\n";
+        announceWinner(winner);
     }
 
 }

@@ -11,15 +11,16 @@
 #include <error.h>
 #include <string>
 #include <string.h>
+
 void givePoint(int clientFd, char team){
     std::vector<int>& Players = (team=='r') ? redPlayers : bluPlayers;
     std::vector<int>& Points = (team=='r') ? redPoints : bluPoints;
     auto it = find(Players.begin(), Players.end(), clientFd);
-    int index;
+    int index = 0;
     if(it != Players.end()){
-        int index = it - Players.begin();
+        index = it - Players.begin();
     } else return;
-    Points[index]++;
+    Points[index]+=1;
     return;
 }
 
@@ -27,15 +28,24 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
     int clientFd = letterPoll[position].fd;
     short int revents = letterPoll[position].revents;
 
-    std::vector<char>& lettersGuessed = (team=='r') ? lettersGuessedRed : lettersGuessedBlu;
+
+    std::vector<int>& Players = (team=='r') ? redPlayers : bluPlayers;
+    std::vector<int>& Points = (team=='r') ? redPoints : bluPoints;
+    std::vector<std::string>& Names = (team=='r') ? redNames : bluNames;
     std::set<char>& lettersLeft = (team=='r') ? lettersLeftRed : lettersLeftBlu;
     std::vector<char>& guesses = (team=='r') ? redGuesses : bluGuesses;
-    std::chrono::steady_clock::time_point& roundStart = (team=='r') ? redRoundStart : bluRoundStart;
+    int& roundCounter = (team=='r') ? redRoundCounter : bluRoundCounter;
     if(revents & ~POLLIN){
         std::cout << "Removing player with fd=" << clientFd << std::endl;
         letterPoll[position] = letterPoll[letterPollCount-1];
         letterPollCount--;
-        //usunac name i fd z listy!!!
+        auto it = find(Players.begin(), Players.end(), clientFd);
+        if (it != Players.end()){
+            int index = it - Players.begin();
+            Players.erase(Players.begin()+index);
+            Names.erase(Names.begin()+index);
+            Points.erase(Points.begin()+index);
+        }
         shutdown(clientFd, SHUT_RDWR);
         close(clientFd);
     }
@@ -47,22 +57,33 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
             revents |= POLLERR;
         }
         else {
-            //    "115/L/"
-            //sprawdzenie czasu
-            //pobrać round z wiadomości i sprawdzić
-            // std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-//MESSAGE
-            // if(std::chrono::duration_cast<std::chrono::milliseconds>(now - roundStart).count() > 15000){
-            //     auto ret = write(clientFd, "302;", 4); //Inform client of message too late
-            //     if(ret==-1) error(1, errno, "write failed on descriptor %d", clientFd);
-            //     if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", clientFd, ret, 4);
-            //     return;
-            // }
-            
-
             //Get message, remove new line
             std::string letterMsg(buffer);
             letterMsg.erase(std::remove(letterMsg.begin(), letterMsg.end(), '\n'), letterMsg.cend());
+            letterMsg.erase(std::remove(letterMsg.begin(), letterMsg.end(), ';'), letterMsg.cend());
+            if(!letterMsg.substr(0,3).compare("115")) return;
+            int round = std::stoi(letterMsg.substr(6));
+            //MESSAGE
+            if(round != roundCounter){
+                std::vector<char>& lettersGuessed = (team=='r') ? lettersGuessedRed : lettersGuessedBlu;
+                std::vector<char>& lettersMissed = (team=='r') ? lettersMissedRed : lettersMissedBlu;
+                std::string code="402/";
+                
+                std::string correctGuesses = "";
+                for(auto c : lettersGuessed) correctGuesses+=c;
+                if(!correctGuesses.compare("")) correctGuesses = "^";
+
+                std::string incorrectGuesses = "";
+                for(auto c : lettersMissed) incorrectGuesses+=c;
+                if(!incorrectGuesses.compare("")) incorrectGuesses = "^";
+
+                std::string msg(code+phrase+"/"+correctGuesses+"/"+incorrectGuesses+";");
+                int msgSize = msg.size();
+                auto ret = write(clientFd, msg.c_str(), msgSize); //Inform client of message too late
+                if(ret==-1) error(1, errno, "write failed on descriptor %d", clientFd);
+                if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", clientFd, ret, msgSize);
+                return;
+            }
 
             char ltr[1];
             strcpy(ltr,letterMsg.substr(4,1).c_str()); //Get letter

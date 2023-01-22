@@ -10,16 +10,7 @@
 #include <arpa/inet.h>
 #include <vector>
 #include <algorithm>
-
-extern int serverSock;
-
-extern std::vector<int> redPlayers;
-extern std::vector<std::string> redNames;
-extern std::vector<int> redPoints;
-
-extern std::vector<int> bluPlayers;
-extern std::vector<std::string> bluNames;
-extern std::vector<int> bluPoints;
+#include "../headers/globalVariables.hh"
 //inform of curr round and  state
 void newPlayerHandler(){
     pollfd playerPoll[1];
@@ -59,15 +50,22 @@ void newPlayerHandler(){
                     continue;
                 }
                 std::string name(buffer);
+
+                char team;
+                if(redPlayers.size()>=bluPlayers.size()) team = 'b';
+                else team = 'r';
+
                 name.erase(std::remove(name.begin(), name.end(), '\n'), name.cend());
                 if(nameTaken(name)){
-                    confirmName(newPlayer, false);
+                    confirmName(newPlayer, team, false);
                     shutdown(newPlayer, SHUT_RDWR);
                     close(newPlayer);
                     continue;
                 }
 
-                if(redPlayers.size()>=bluPlayers.size()) {
+                pollfd *letterPoll = (team=='r') ? letterPollRed : letterPollBlu;
+                int& letterPollCount = (team=='r') ? letterPollCountRed : letterPollCountBlu;
+                if(team=='b') {
                     bluPlayers.push_back(newPlayer);
                     bluNames.push_back(name);
                     bluPoints.push_back(0);
@@ -76,8 +74,11 @@ void newPlayerHandler(){
                     redNames.push_back(name);
                     redPoints.push_back(0);
                 }
+                letterPoll[letterPollCount].fd=newPlayer;
+                letterPoll[letterPollCount].events=POLLIN;
+                letterPollCount++;
 
-                confirmName(newPlayer);
+                confirmName(newPlayer, team);
             }
         }
     }

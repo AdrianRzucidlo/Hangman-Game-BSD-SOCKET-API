@@ -3,10 +3,7 @@
 #include <error.h>
 #include <errno.h>
 #include <iostream>
-
-
-extern const int PORT = 8090;
-extern int serverSock;
+#include "../headers/globalVariables.hh"
 
 void setReuseAddr(int socket){
     const int one = 1;

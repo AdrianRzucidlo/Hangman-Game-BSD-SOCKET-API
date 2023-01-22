@@ -10,13 +10,17 @@ void acceptLetters(char team){
     pollfd *letterPoll = (team=='r') ? letterPollRed : letterPollBlu;
     int& letterPollCount = (team=='r') ? letterPollCountRed : letterPollCountBlu;
 
-    for(int i = 0; i < Players.size(); ++i){
+    int playerCount = Players.size();
+
+    for(int i = 0; i < playerCount; ++i){
+        //semafor?
         letterPoll[i].fd=Players[i];
         letterPoll[i].events=POLLIN;
         letterPollCount++;
     }
     int ready;
     while(1){
+        //dodać reakcję poll na serwerowy socket?
         ready = poll(letterPoll, letterPollCount, -1);
 
         if(ready == -1){
