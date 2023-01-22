@@ -8,10 +8,17 @@ void confirmName(int playerFd, char team, bool accepted = true){
     if(accepted){
         //MESSAGE
 
+        if(inLobby){
+            auto ret = write(playerFd, "101;", 4);
+            if(ret==-1) error(1, errno, "write failed on descriptor %d", playerFd);
+            if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, 4);
+            return;
+        }
+
         std::vector<char>& lettersGuessed = (team=='r') ? lettersGuessedRed : lettersGuessedBlu;
         std::vector<char>& lettersMissed = (team=='r') ? lettersMissedRed : lettersMissedBlu;
 
-        std::string code="402/";
+        std::string code="102/";
         
         std::string correctGuesses = "";
         for(auto c : lettersGuessed) correctGuesses+=c;
@@ -31,7 +38,7 @@ void confirmName(int playerFd, char team, bool accepted = true){
         if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, msgSize);
         return;
     } else {
-        auto ret = write(playerFd, "401/^/^;", 4);
+        auto ret = write(playerFd, "401;", 4);
         if(ret==-1) error(1, errno, "write failed on descriptor %d", playerFd);
         if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, 4);
         return;

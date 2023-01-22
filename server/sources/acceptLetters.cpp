@@ -4,6 +4,7 @@
 #include <error.h>
 #include "../headers/letterPollEvent.hh"
 #include "../headers/globalVariables.hh"
+#include <iostream>
 
 void acceptLetters(char team){
     std::vector<int>& Players = (team=='r') ? redPlayers : bluPlayers;
@@ -22,7 +23,7 @@ void acceptLetters(char team){
     while(1){
         //dodać reakcję poll na serwerowy socket?
         ready = poll(letterPoll, letterPollCount, -1);
-
+        std::cout << "reakcja\n";
         if(ready == -1){
             error(0, errno, "poll failed");
         }

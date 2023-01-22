@@ -27,7 +27,7 @@ void givePoint(int clientFd, char team){
 void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, char team){
     int clientFd = letterPoll[position].fd;
     short int revents = letterPoll[position].revents;
-
+    //std::cout << "LetterPoll\n";
 
     std::vector<int>& Players = (team=='r') ? redPlayers : bluPlayers;
     std::vector<int>& Points = (team=='r') ? redPoints : bluPoints;
@@ -36,7 +36,7 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
     std::vector<char>& guesses = (team=='r') ? redGuesses : bluGuesses;
     int& roundCounter = (team=='r') ? redRoundCounter : bluRoundCounter;
     if(revents & ~POLLIN){
-        std::cout << "Removing player with fd=" << clientFd << std::endl;
+        std::cout << "[L]Removing player with fd=" << clientFd << std::endl;
         letterPoll[position] = letterPoll[letterPollCount-1];
         letterPollCount--;
         auto it = find(Players.begin(), Players.end(), clientFd);
@@ -59,11 +59,14 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
         else {
             //Get message, remove new line
             std::string letterMsg(buffer);
+
             letterMsg.erase(std::remove(letterMsg.begin(), letterMsg.end(), '\n'), letterMsg.cend());
             letterMsg.erase(std::remove(letterMsg.begin(), letterMsg.end(), ';'), letterMsg.cend());
-            if(!letterMsg.substr(0,3).compare("115")) return;
+            if(letterMsg.substr(0,3).compare("115")) return;
             int round = std::stoi(letterMsg.substr(6));
+            std::cout << "[L]Round received: " << round << " | Actual: " << roundCounter << std::endl;
             //MESSAGE
+            
             if(round != roundCounter){
                 std::vector<char>& lettersGuessed = (team=='r') ? lettersGuessedRed : lettersGuessedBlu;
                 std::vector<char>& lettersMissed = (team=='r') ? lettersMissedRed : lettersMissedBlu;
@@ -87,7 +90,7 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
 
             char ltr[1];
             strcpy(ltr,letterMsg.substr(4,1).c_str()); //Get letter
-        
+            std::cout << "<> Received letter: " << *ltr << std::endl;
             *ltr = std::tolower(*ltr);
             std::cout << "Received letter " << *ltr << " from fd=" << clientFd << std::endl;
 

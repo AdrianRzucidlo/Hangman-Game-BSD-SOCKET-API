@@ -35,13 +35,13 @@ void newPlayerHandler(){
                 int newPlayer = accept(serverSock, (sockaddr*) &clientAddr, &clientAddrSize);
                 if(newPlayer == -1) error(1, errno, "accept failed");
 
-                confirmConnection(newPlayer);
-
-                std::cout << "New connection attempt from " << 
+                std::cout << "::New connection attempt from " << 
                 inet_ntoa(clientAddr.sin_addr) <<":"<< 
                 ntohs(clientAddr.sin_port) << "  FD: " << 
                 newPlayer << std::endl;
-                //MESSAGE
+                std::cout << "::Confirming connection\n";
+                confirmConnection(newPlayer);
+                std::cout << "::Reading Name\n";
                 int received = read(newPlayer, buffer, 128);
                 if(received == -1) error(1,errno, "name read failed on descriptor %d", newPlayer);
                 if(received <= 0){
@@ -57,12 +57,16 @@ void newPlayerHandler(){
 
                 name.erase(std::remove(name.begin(), name.end(), '\n'), name.cend());
                 if(nameTaken(name)){
+                    std::cout << "::Rejecting Name\n";
                     confirmName(newPlayer, team, false);
                     shutdown(newPlayer, SHUT_RDWR);
                     close(newPlayer);
                     continue;
                 }
+                std::cout << "::Confirming Name\n";
+                confirmName(newPlayer, team);
 
+                std::cout << "::Adding player to letter poll\n";
                 pollfd *letterPoll = (team=='r') ? letterPollRed : letterPollBlu;
                 int& letterPollCount = (team=='r') ? letterPollCountRed : letterPollCountBlu;
                 if(team=='b') {
@@ -78,7 +82,7 @@ void newPlayerHandler(){
                 letterPoll[letterPollCount].events=POLLIN;
                 letterPollCount++;
 
-                confirmName(newPlayer, team);
+                
             }
         }
     }

@@ -2,7 +2,7 @@
 #include <unistd.h>
 
 void lobbyTimer(){
-    while(bluPlayers.size() < 1 || redPlayers.size() < 1){
+    while(bluPlayers.empty() || redPlayers.empty()){
         sleep(15);
     }
 }

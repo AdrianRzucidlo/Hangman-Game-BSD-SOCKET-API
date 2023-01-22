@@ -45,6 +45,11 @@ int main()
     std::cout << "Running connection handling thread...\n";
     std::thread playerAcceptingthread(newPlayerHandler);
     
+    for(int i = 0; i < MAX_PLAYERS_PER_TEAM; ++i){
+        letterPollRed[i].revents = 0;
+        letterPollBlu[i].revents = 0;
+    }
+
     while(1){
         std::cout << "Entering lobby...\n";
         lobbyTimer();

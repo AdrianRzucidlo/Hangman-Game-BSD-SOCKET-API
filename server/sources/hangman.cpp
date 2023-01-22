@@ -7,16 +7,26 @@
 #include <error.h>
 #include "../headers/hangman.hh"
 #include "../headers/globalVariables.hh"
-
-
+#include <iostream>
+#include <fstream>
 std::string getAPhrase(std::uniform_int_distribution<> dist, std::mt19937 gen){
-    std::ifstream file("phrases.txt");
+    
     int lineN = dist(gen);
+
     std::string line;
+    std::ifstream file("./phrases.txt");
+    if(!file){
+        error(1, errno, "file");
+        std::cout << "ERROR: Could not open phrases file, shutting down..\n";
+        close(serverSock);
+        exit(0);
+    }
     for(int i = 0; i <= lineN; ++i){
-        std::getline(file, line);
+        file >> line;
     }
     file.close();
+    std::cout << ":::Generated phrase: " << line << std::endl;
+
     return line;
 }
 
@@ -33,9 +43,11 @@ void roundEnd(char team, bool correct){
     }
     std::string correctGuesses = "";
     for(auto c : lettersGuessed) correctGuesses+=c;
+    if(!correctGuesses.compare("")) correctGuesses = "^";
 
     std::string incorrectGuesses = "";
     for(auto c : lettersMissed) incorrectGuesses+=c;
+    if(!incorrectGuesses.compare("")) incorrectGuesses = "^";
 
     std::string msg(code+phrase+"/"+correctGuesses+"/"+incorrectGuesses+";");
     int msgSize = msg.size();
@@ -58,6 +70,7 @@ int mostVotes(int *alphabet){
             idx = i;
         }
     }
+    if(votes==0) return -1;
     return idx;
 }
 void clearVotes(int* votes){
@@ -66,10 +79,11 @@ void clearVotes(int* votes){
 }
 
 char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
-    
+    std::cout << ":::Starting letter poll threads\n";
     std::thread playerLetterThreadRed(acceptLetters, 'r');
     std::thread playerLetterThreadBlu(acceptLetters, 'b');
 
+    std::cout << ":::Generating secret phrase\n";
     phrase = getAPhrase(dist, gen);
     int len = phrase.length();
 
@@ -117,7 +131,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
 
         redMostVotedIdx = mostVotes(redAlphabet);
         bluMostVotedIdx = mostVotes(bluAlphabet);
-
+        if(redMostVotedIdx == -1){
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() < 15000) continue;
+        }
         if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() >= 15000 || 
            redReceivedVotes == (int) redPlayers.size() || 
            redAlphabet[redMostVotedIdx] >= (int) redPlayers.size()){
@@ -141,6 +157,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
             std::thread redRoundNext(roundEnd, 'r', correct);
             redRoundNext.detach();
             redRoundStart = std::chrono::steady_clock::now();
+        }
+        if(bluMostVotedIdx == -1){
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() < 15000) continue;
         }
         if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() >= 15000 || 
            bluReceivedVotes == (int) bluPlayers.size() ||
