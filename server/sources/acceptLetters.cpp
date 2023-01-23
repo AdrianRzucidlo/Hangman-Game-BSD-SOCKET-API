@@ -27,7 +27,9 @@ void acceptLetters(char team){
         //dodać reakcję poll na serwerowy socket?
         std::cout << "[L]Polling...\n";
         ready = poll(letterPoll, letterPollCount, -1);
-
+        if(inLobby){
+            return;
+        }
         if(ready == -1){
             error(0, errno, "poll failed");
         }

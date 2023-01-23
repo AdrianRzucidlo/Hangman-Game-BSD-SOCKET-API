@@ -92,9 +92,8 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
 
             char ltr[1];
             strcpy(ltr,letterMsg.substr(4,1).c_str()); //Get letter
-            std::cout << "<> Received letter: " << *ltr << std::endl;
             *ltr = std::tolower(*ltr);
-            std::cout << "Received letter " << *ltr << " from fd=" << clientFd << std::endl;
+            std::cout << "[L]Received letter " << *ltr << " from fd=" << clientFd << std::endl;
 
             guesses.push_back(*ltr); //Add letter to list of team guesses
 

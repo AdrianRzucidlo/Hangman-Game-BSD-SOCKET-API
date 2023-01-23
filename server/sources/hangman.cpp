@@ -104,7 +104,12 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
 
     clearVotes(redAlphabet);
     clearVotes(bluAlphabet);
-
+    redGuesses.clear();
+    bluGuesses.clear();
+    lettersLeftBlu.clear();
+    lettersLeftRed.clear();
+    lettersMissedBlu.clear();
+    lettersMissedRed.clear();
     for (int i = 0; i < len; ++i){
         lettersLeftBlu.insert(phrase[i]);
         lettersLeftRed.insert(phrase[i]);
@@ -119,6 +124,8 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
 
     bluRoundCounter = 1;
     redRoundCounter = 1;
+
+    
     std::cout << "::Starting game\n";
     while(redHangman < 8 && bluHangman < 8) {
         currentTime = std::chrono::steady_clock::now();
@@ -138,9 +145,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
         redMostVotedIdx = mostVotes(redAlphabet);
         bluMostVotedIdx = mostVotes(bluAlphabet);
         if(redMostVotedIdx == -1){
-            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() < 3000) continue;
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() < 15000) continue;
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() >= 3000 || 
+        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() >= 15000 || 
            redReceivedVotes == (int) redPlayers.size() || 
            redAlphabet[redMostVotedIdx] >= (int) redPlayers.size()){
 
@@ -165,9 +172,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
             redRoundStart = std::chrono::steady_clock::now();
         }
         if(bluMostVotedIdx == -1){
-            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() < 3000) continue;
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() < 15000) continue;
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() >= 3000 || 
+        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() >= 15000 || 
            bluReceivedVotes == (int) bluPlayers.size() ||
            bluAlphabet[bluMostVotedIdx] >= (int) bluPlayers.size()){
             

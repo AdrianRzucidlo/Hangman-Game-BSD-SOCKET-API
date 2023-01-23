@@ -32,7 +32,7 @@ void announceWinner(char winner){
 
     bestFromWinners = (winner == 'r') ? bestRed + ":" + std::to_string(maxRed) : bestBlu + ":" + std::to_string(maxBlu);
     bestFromLosers = (winner == 'r') ? bestBlu + ":" + std::to_string(maxBlu) : bestRed + ":" + std::to_string(maxRed);
-    std::string msg(code+phrase+"/"+
+    std::string msg(code+"/"+
     bestFromWinners+"/"+
     bestFromLosers+";");
     int msgSize = msg.size();
