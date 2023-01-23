@@ -6,7 +6,6 @@
 #include <iostream>
 
 void announceWinner(char winner){
-    std::string code= (winner='r') ? "501" : "502";
     
     std::string bestFromWinners;
     std::string bestFromLosers;
@@ -32,30 +31,35 @@ void announceWinner(char winner){
 
     bestFromWinners = (winner == 'r') ? bestRed + ":" + std::to_string(maxRed) : bestBlu + ":" + std::to_string(maxBlu);
     bestFromLosers = (winner == 'r') ? bestBlu + ":" + std::to_string(maxBlu) : bestRed + ":" + std::to_string(maxRed);
-    std::string msg(code+"/"+
+
+    std::string msgWin("501/"+
     bestFromWinners+"/"+
     bestFromLosers+";");
-    int msgSize = msg.size();
+    std::string msgLoss("502/"+
+    bestFromLosers+"/"+
+    bestFromWinners+";");
+
+    int msgSize = msgWin.size();
     std::cout << "::Informing players\n";
     if(winner == 'b'){
         for(auto fd : redPlayers){
-            auto ret = write(fd, msg.c_str(), msgSize);
+            auto ret = write(fd, msgLoss.c_str(), msgSize);
             if(ret==-1) error(1, errno, "write failed on descriptor %d", fd);
             if(ret!=msgSize) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", fd, ret, msgSize);
         }
         for(auto fd : bluPlayers){
-            auto ret = write(fd, msg.c_str(), msgSize);
+            auto ret = write(fd, msgWin.c_str(), msgSize);
             if(ret==-1) error(1, errno, "write failed on descriptor %d", fd);
             if(ret!=msgSize) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", fd, ret, msgSize);
         }
     } else {
         for(auto fd : bluPlayers){
-            auto ret = write(fd, msg.c_str(), msgSize);
+            auto ret = write(fd, msgLoss.c_str(), msgSize);
             if(ret==-1) error(1, errno, "write failed on descriptor %d", fd);
             if(ret!=msgSize) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", fd, ret, msgSize);
         }
         for(auto fd : redPlayers){
-            auto ret = write(fd, msg.c_str(), msgSize);
+            auto ret = write(fd, msgWin.c_str(), msgSize);
             if(ret==-1) error(1, errno, "write failed on descriptor %d", fd);
             if(ret!=msgSize) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", fd, ret, msgSize);
         }

@@ -11,7 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include "../headers/globalVariables.hh"
-//inform of curr round and  state
+
 void newPlayerHandler(){
     pollfd playerPoll[1];
     playerPoll[0].fd = serverSock;
