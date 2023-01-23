@@ -35,7 +35,7 @@ void confirmName(int playerFd, char team, bool accepted = true){
 
         auto ret = write(playerFd, msg.c_str(), msgSize);
         if(ret==-1) error(1, errno, "write failed on descriptor %d", playerFd);
-        if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, msgSize);
+        if(ret!=msgSize) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", playerFd, ret, msgSize);
         return;
     } else {
         auto ret = write(playerFd, "401;", 4);
