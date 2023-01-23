@@ -7,11 +7,7 @@
 
 #define MAX_PLAYERS_PER_TEAM 32
 #define MAX_USERS 64;
-// const int PORT = 8090;
-// const int MAX_USERS = 64;
-// std::random_device rd;
-// std::mt19937 gen(rd());
-// std::uniform_int_distribution<> dist(0, 212);
+
 bool inLobby = true;
 int serverSock;
 pollfd letterPollRed[MAX_PLAYERS_PER_TEAM];

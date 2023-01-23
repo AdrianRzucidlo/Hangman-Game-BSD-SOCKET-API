@@ -98,7 +98,7 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
                 int msgSize = msg.size();
                 auto ret = write(clientFd, msg.c_str(), msgSize); //Inform client of message too late
                 if(ret==-1) error(1, errno, "write failed on descriptor %d", clientFd);
-                if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", clientFd, ret, msgSize);
+                if(ret!=msgSize) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", clientFd, ret, msgSize);
                 return;
             }
 
