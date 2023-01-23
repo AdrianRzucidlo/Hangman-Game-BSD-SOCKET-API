@@ -58,9 +58,9 @@ public:
     QLabel *label_3;
     QLabel *label_4;
     QLineEdit *lineEdit_3;
-    QSpinBox *spinBox;
     QLabel *label_5;
     QLabel *label_6;
+    QSpinBox *spinBox;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -69,7 +69,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(400, 467);
+        MainWindow->resize(398, 431);
         QPalette palette;
         QBrush brush(QColor(255, 255, 255, 255));
         brush.setStyle(Qt::SolidPattern);
@@ -151,7 +151,7 @@ public:
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QStringLiteral("groupBox"));
         groupBox->setEnabled(false);
-        groupBox->setGeometry(QRect(9, 139, 381, 221));
+        groupBox->setGeometry(QRect(9, 139, 381, 211));
         textBrowser_2 = new QTextBrowser(groupBox);
         textBrowser_2->setObjectName(QStringLiteral("textBrowser_2"));
         textBrowser_2->setGeometry(QRect(0, 0, 381, 51));
@@ -249,25 +249,35 @@ public:
         label_3->setGeometry(QRect(130, 180, 101, 20));
         label_4 = new QLabel(centralWidget);
         label_4->setObjectName(QStringLiteral("label_4"));
-        label_4->setGeometry(QRect(10, 360, 151, 16));
+        label_4->setGeometry(QRect(10, 350, 141, 16));
         lineEdit_3 = new QLineEdit(centralWidget);
         lineEdit_3->setObjectName(QStringLiteral("lineEdit_3"));
-        lineEdit_3->setGeometry(QRect(90, 380, 113, 23));
-        spinBox = new QSpinBox(centralWidget);
-        spinBox->setObjectName(QStringLiteral("spinBox"));
-        spinBox->setGeometry(QRect(310, 380, 81, 24));
-        spinBox->setMaximum(10000);
-        spinBox->setValue(8090);
+        lineEdit_3->setGeometry(QRect(80, 370, 113, 23));
+        QPalette palette10;
+        palette10.setBrush(QPalette::Active, QPalette::Base, brush6);
+        palette10.setBrush(QPalette::Inactive, QPalette::Base, brush6);
+        palette10.setBrush(QPalette::Disabled, QPalette::Base, brush2);
+        lineEdit_3->setPalette(palette10);
         label_5 = new QLabel(centralWidget);
         label_5->setObjectName(QStringLiteral("label_5"));
-        label_5->setGeometry(QRect(250, 380, 59, 15));
+        label_5->setGeometry(QRect(20, 370, 51, 16));
         label_6 = new QLabel(centralWidget);
         label_6->setObjectName(QStringLiteral("label_6"));
-        label_6->setGeometry(QRect(20, 380, 59, 15));
+        label_6->setGeometry(QRect(240, 370, 31, 16));
+        spinBox = new QSpinBox(centralWidget);
+        spinBox->setObjectName(QStringLiteral("spinBox"));
+        spinBox->setGeometry(QRect(280, 370, 81, 24));
+        QPalette palette11;
+        palette11.setBrush(QPalette::Active, QPalette::Base, brush6);
+        palette11.setBrush(QPalette::Inactive, QPalette::Base, brush6);
+        palette11.setBrush(QPalette::Disabled, QPalette::Base, brush2);
+        spinBox->setPalette(palette11);
+        spinBox->setMaximum(100000);
+        spinBox->setValue(8090);
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 20));
+        menuBar->setGeometry(QRect(0, 0, 398, 20));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QStringLiteral("mainToolBar"));
@@ -304,10 +314,10 @@ public:
         label->setText(QApplication::translate("MainWindow", "Aktualne haslo", 0));
         label_2->setText(QApplication::translate("MainWindow", "Wykorzystane literki", 0));
         label_3->setText(QApplication::translate("MainWindow", "Wybierz literke", 0));
-        label_4->setText(QApplication::translate("MainWindow", "Ustawienia polaczenia:", 0));
+        label_4->setText(QApplication::translate("MainWindow", "Ustawienia polaczenia;", 0));
         lineEdit_3->setText(QApplication::translate("MainWindow", "127.0.0.1", 0));
-        label_5->setText(QApplication::translate("MainWindow", "Port:", 0));
-        label_6->setText(QApplication::translate("MainWindow", "Adres:", 0));
+        label_5->setText(QApplication::translate("MainWindow", "Adres:", 0));
+        label_6->setText(QApplication::translate("MainWindow", "Port:", 0));
     } // retranslateUi
 
 };

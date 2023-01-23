@@ -28,6 +28,9 @@ protected:
     std::string zakryjhaslo(const std::string& s,const std::string& odkryte);
     void rysujwisielca(int i);
     void setTimerForSendButton();
+    void Polaczono();
+    void ObsluzRunde(std::string dobre, std::string zle,std::string haslo);
+    void ObsluzKoniecGry(std::string rankingNasi,std::string rankingPrzeciwnik);
 
 private:
     Ui::MainWindow *ui;

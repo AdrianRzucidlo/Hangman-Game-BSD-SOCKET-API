@@ -3,7 +3,8 @@
 #include <QTimer>
 using namespace std;
 string zuzyteliterki;
-QString qzuzyteliterki;
+int wasinlobby;
+int mojepunkty;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -21,14 +22,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 void MainWindow::dolaczBtnHit(){
+    mojepunkty = 0;
+    wasinlobby = 0;
     if(sock)
             delete sock;
     sock = new QTcpSocket(this);
     zuzyteliterki = "";
-    sock->connectToHost("127.0.0.1", 8080);
+    sock->connectToHost(ui->lineEdit_3->text(),ui->spinBox->value());
     connect(sock, &QTcpSocket::connected, this, &MainWindow::socketConnected);
     connect(sock, &QTcpSocket::disconnected, this, &MainWindow::socketDisconnected);
-    //connect(sock, &QTcpSocket::errorOccurred, this, &MyWidget::socketError);
     connect(sock, &QTcpSocket::readyRead, this, &MainWindow::socketReadable);
 }
 
@@ -41,11 +43,14 @@ void MainWindow::sendBtnHit(){
         ui->textBrowser_2->append("Literka musi byc jednym znakiem[a-z]!");
         return;
     }
-    if(zuzyteliterki.find(str[0]) != string::npos)
+    if(zuzyteliterki.size() != 0)
     {
-        ui->textBrowser_2->clear();
-        ui->textBrowser_2->append("Ta literka juz byla uzyta!");
-        return;
+        if(zuzyteliterki.find(str[0]) != string::npos)
+        {
+            ui->textBrowser_2->clear();
+            ui->textBrowser_2->append("Ta literka juz byla uzyta!");
+            return;
+        }
     }
     string runda = to_string(zuzyteliterki.size()+1);
     string komunikat = "115/" + str + "/"+runda;
@@ -59,146 +64,109 @@ void MainWindow::sendBtnHit(){
 void MainWindow::socketConnected(){
     ui->textBrowser_2->clear();
     ui->textBrowser_2->append("Laczenie z serwerem gry...");
+    ui->lineEdit_3->setEnabled(false);
+    ui->spinBox->setEnabled(false);
 }
 
 void MainWindow::socketReadable(){
+
     QByteArray ba = sock->readAll();
-    if(QString::fromUtf8(ba).trimmed()=="100") //przyjeto polaczenie
-{
+    string s = (QString::fromUtf8(ba).trimmed()).toStdString();
+    s.pop_back();
+    if(s =="100") //przyjeto polaczenie
+    {
         auto txt = ui->lineEdit->text().trimmed();
         if(txt.isEmpty())
             return;
         sock->write((txt).toUtf8());
         return;
     }
-    if(QString::fromUtf8(ba).trimmed()=="101") // gra jest w lobby
-{
-        ui->z1->setVisible(false);
-        ui->z2->setVisible(false);
-        ui->z3->setVisible(false);
-        ui->z4->setVisible(false);
-        ui->z5->setVisible(false);
-        ui->z6->setVisible(false);
-        ui->z7->setVisible(false);
-        ui->z8->setVisible(false);
-        ui->groupBox->setEnabled(true);
-        ui->lineEdit->setEnabled(false);
-        ui->dolaczButton->setEnabled(false);
-        ui->textBrowser_2->clear();
-        ui->textBrowser_2->append("Polaczono z gra! Oczekiwanie na pozostalych uczestnikow...");
+    if(s =="101") // gra jest w lobby
+    {
+        wasinlobby = 1;
+        Polaczono();
         return;
     }
-    if(QString::fromUtf8(ba).trimmed()=="401") //zla nazwa, wypad
-{
+    if(s =="401") //zla nazwa, wypad
+    {
         ui->textBrowser_2->clear();
         ui->textBrowser_2->append("Podano nieprawidlowa nazwe uzytkownika, sprobuj ponownie!");
         sock->disconnect();
         return;
     }
-    if(QString::fromUtf8(ba).trimmed() == "202"){//wygrana
-
-        ui->textBrowser_2->clear();
-        ui->textBrowser_2->append("ZWYCIESTWO!! BRAWO!!");
-        ui->lineEdit->setEnabled(true);
-        ui->dolaczButton->setEnabled(true);
-        return;
+    if(s == "444")
+    {
+        ui->textBrowser_2->append("Osiagnieto max graczy.");
+        sock->disconnect();
     }
-    if(QString::fromUtf8(ba).trimmed() == "302"){//przegrana
-
-        ui->textBrowser_2->clear();
-        ui->textBrowser_2->append("Tym razem druga druzyna byla lepsza! Sprobuj ponownie!");
-        ui->lineEdit->setEnabled(true);
-        ui->dolaczButton->setEnabled(true);
-        return;
+    if(s == "201")
+    {
+        mojepunkty++;
     }
     else{
-        vector<string> vector = splits(QString::fromUtf8(ba).trimmed().toStdString(),"/");
+        vector<string> vector = splits(s,"/");
         string code = vector[0];
-        string haslo;
-        string dobreliterki;
-        string zleliterki;
-        string uzyteliterki;
-        QString quzyteliterki;
-        QString zakrytehaslo;
-        if(code == "102") // gra zaczyna sie
+        if(wasinlobby == 0)
         {
+            Polaczono();
+        }
+        if(code == "102") // rozgrywka
+        {
+
+            ui->pushButton_2->setEnabled(true);
             ui->textBrowser_2->clear();
             ui->textBrowser_2->append("Polaczono z gra! Masz 15 sekund na wybor literki!");
-            haslo = vector[1];
-            if(vector.size() == 4)//gra juz trwa
-            {
-                dobreliterki = vector[2];
-                zleliterki = vector[3];
-                zleliterki.erase(remove(zleliterki.begin(),zleliterki.end(),'^'),zleliterki.end());
-                dobreliterki.erase(remove(dobreliterki.begin(),dobreliterki.end(),'^'),dobreliterki.end());
-                zakrytehaslo =  QString::fromStdString(zakryjhaslo(haslo,dobreliterki));
-                uzyteliterki = dobreliterki + zleliterki;
-                zuzyteliterki = uzyteliterki;
-                quzyteliterki = QString::fromStdString(uzyteliterki);
-                ui->textBrowser_4->clear();
-                ui->textBrowser_4->append(quzyteliterki);
-                ui->textBrowser_3->clear();
-                ui->textBrowser_3->append(zakrytehaslo);
-                rysujwisielca(zleliterki.size());
-        }
-        }
-        if(code == "201"){ //wybrano dobra
-
-            ui->textBrowser_2->clear();
-            ui->textBrowser_2->append("Udalo wam sie wybrac dobra literke!Masz 15 sekund na wybor kolejnej!");
-            haslo = vector[1];
             if(vector.size() == 4)
             {
-                dobreliterki = vector[2];
-                zleliterki = vector[3];
-                zleliterki.erase(remove(zleliterki.begin(),zleliterki.end(),'^'),zleliterki.end());
-                dobreliterki.erase(remove(dobreliterki.begin(),dobreliterki.end(),'^'),dobreliterki.end());
-                zakrytehaslo =  QString::fromStdString(zakryjhaslo(haslo,dobreliterki));
-                uzyteliterki = dobreliterki + zleliterki;
-                zuzyteliterki = uzyteliterki;
-                quzyteliterki = QString::fromStdString(uzyteliterki);
-                ui->textBrowser_4->clear();
-                ui->textBrowser_4->append(quzyteliterki);
-                ui->textBrowser_3->clear();
-                ui->textBrowser_3->append(zakrytehaslo);
-                rysujwisielca(zleliterki.size());
+                ObsluzRunde(vector[2],vector[3],vector[1]);
+        }
+        }
+        if(code  == "502"){//przegrana
+
+            ui->textBrowser_2->clear();
+            ui->textBrowser_2->append("Tym razem druga druzyna byla lepsza! Przegraliscie!");
+            ObsluzKoniecGry(vector[1],vector[2]);
+            return;
+        }
+        if(code  == "501"){//wygrana
+
+            ui->textBrowser_2->clear();
+            ui->textBrowser_2->append("ZWYCIESTWO!! BRAWO!!");
+            ObsluzKoniecGry(vector[1],vector[2]);
+            return;
+        }
+        if(code == "202"){ //wybrano dobra
+            ui->pushButton_2->setEnabled(true);
+            ui->textBrowser_2->clear();
+            ui->textBrowser_2->append("Udalo wam sie wybrac dobra literke!Masz 15 sekund na wybor kolejnej!");
+            if(vector.size() == 4)
+            {
+                ObsluzRunde(vector[2],vector[3],vector[1]);
             }
 
         }
-        if(code == "301"){//wybrano zla
+        if(code == "302")//wybrano zla
+        {
+            ui->pushButton_2->setEnabled(true);
 
             ui->textBrowser_2->clear();
             ui->textBrowser_2->append("Nastepnym razem wam sie uda!Masz na to 15 sekund!");
-            haslo = vector[1];
             if(vector.size() == 4)
             {
-                dobreliterki = vector[2];
-                zleliterki = vector[3];
-                zleliterki.erase(remove(zleliterki.begin(),zleliterki.end(),'^'),zleliterki.end());
-                dobreliterki.erase(remove(dobreliterki.begin(),dobreliterki.end(),'^'),dobreliterki.end());
-                zakrytehaslo =  QString::fromStdString(zakryjhaslo(haslo,dobreliterki));
-                uzyteliterki = dobreliterki + zleliterki;
-                zuzyteliterki = uzyteliterki;
-                quzyteliterki = QString::fromStdString(uzyteliterki);
-                ui->textBrowser_4->clear();
-                ui->textBrowser_4->append(quzyteliterki);
-                ui->textBrowser_3->clear();
-                ui->textBrowser_3->append(zakrytehaslo);
-                rysujwisielca(zleliterki.size());
-        }
+                ObsluzRunde(vector[2],vector[3],vector[1]);
+            }
         }
     }
-    setTimerForSendButton();
 }
 
 void MainWindow::socketDisconnected(){
 
-    ui->textBrowser_2->clear();
     ui->textBrowser_2->append("Rozlaczono z serwerem gry!");
     ui->textBrowser_2->append("Podejmij nowa probe polaczenia!");
-    ui->groupBox->setEnabled(false);
     ui->lineEdit->setEnabled(true);
     ui->dolaczButton->setEnabled(true);
+    ui->pushButton_2->setEnabled(false);
+    ui->lineEdit_2->setEnabled(false);
     ui->z1->setVisible(false);
     ui->z2->setVisible(false);
     ui->z3->setVisible(false);
@@ -207,6 +175,9 @@ void MainWindow::socketDisconnected(){
     ui->z6->setVisible(false);
     ui->z7->setVisible(false);
     ui->z8->setVisible(false);
+    ui->lineEdit_3->setEnabled(true);
+    ui->spinBox->setEnabled(true);
+    ui->textBrowser_2->setEnabled(true);
 }
 
 vector<string> MainWindow::splits(string s, string delimiter) {
@@ -297,15 +268,53 @@ void MainWindow::rysujwisielca(int i)
     }
 }
 
-void MainWindow::setTimerForSendButton()
+void MainWindow::Polaczono()
 {
-    ui->pushButton_2->setEnabled(true);
-    timer = new QTimer(this);
-    timer->setSingleShot(true);
-    connect(timer, &QTimer::timeout, [&]{
-        timer->deleteLater();
-        timer=nullptr;
-        ui->pushButton_2->setEnabled(false);
-    });
-    timer->start(15000);
+    ui->z1->setVisible(false);
+    ui->z2->setVisible(false);
+    ui->z3->setVisible(false);
+    ui->z4->setVisible(false);
+    ui->z5->setVisible(false);
+    ui->z6->setVisible(false);
+    ui->z7->setVisible(false);
+    ui->z8->setVisible(false);
+    ui->groupBox->setEnabled(true);
+    ui->lineEdit->setEnabled(false);
+    ui->dolaczButton->setEnabled(false);
+    ui->textBrowser_2->clear();
+    ui->textBrowser_2->append("Polaczono z gra! Oczekiwanie na pozostalych uczestnikow...");
+    ui->pushButton_2->setEnabled(false);
+}
+
+void MainWindow::ObsluzRunde(string dobre, string zle,string haslo)
+{
+    string dobreliterki = dobre;
+    string zleliterki = zle;
+    zleliterki.erase(remove(zleliterki.begin(),zleliterki.end(),'^'),zleliterki.end());
+    rysujwisielca(zleliterki.size());
+    zleliterki.erase(remove(zleliterki.begin(),zleliterki.end(),'`'),zleliterki.end());
+    dobreliterki.erase(remove(dobreliterki.begin(),dobreliterki.end(),'^'),dobreliterki.end());
+    QString zakrytehaslo =  QString::fromStdString(zakryjhaslo(haslo,dobreliterki));
+    string uzyteliterki = dobreliterki + zleliterki;
+    zuzyteliterki = uzyteliterki;
+    QString quzyteliterki = QString::fromStdString(uzyteliterki);
+    ui->textBrowser_4->clear();
+    ui->textBrowser_4->append(quzyteliterki);
+    ui->textBrowser_3->clear();
+    ui->textBrowser_3->append(zakrytehaslo);
+    rysujwisielca(zleliterki.size());
+}
+
+void MainWindow::ObsluzKoniecGry(string rankingNasi,string rankingPrzeciwnik)
+{
+    QString qrankingNasi = QString::fromStdString(rankingNasi);
+    ui->textBrowser_2->append("Nasz najlepszy zawodnik i jego punkty:");
+    ui->textBrowser_2->append(qrankingNasi);
+    QString qrankingPrzeciwnik = QString::fromStdString(rankingPrzeciwnik);
+    ui->textBrowser_2->append("Przeciwny najlepszy zawodnik i jego punkty:");
+    ui->textBrowser_2->append(qrankingPrzeciwnik);
+    ui->textBrowser_2->append("Moje punkty:");
+    ui->textBrowser_2->append(QString::number(mojepunkty));
+    ui->lineEdit->setEnabled(true);
+    ui->dolaczButton->setEnabled(true);
 }
