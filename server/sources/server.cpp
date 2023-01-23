@@ -32,15 +32,26 @@ void ctrl_c(int) {
     exit(0);
 }
 
-int main()
-{
+int main(int argc, char ** argv){
+    if(argc!=2) {
+        printf("Usage: %s <port>\n", argv[0]);
+        return 1;
+    }
+    char *end;
+    long port = strtol(argv[1], &end,10);
+    if(*end != 0 || port < 1 || port > 65535){
+        printf("Invalid argument: %s is not a port number\nUsage: %s <port>\n", argv[2], argv[0]);
+        return 1;
+    }
+
+
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distr(0, 212);
 
     signal(SIGINT, ctrl_c);
     std::cout << "Initializing server...\n";
-    createServer();
+    createServer(port);
     std::cout << "Server created\n";
     std::cout << "Running connection handling thread...\n";
     std::thread playerAcceptingthread(newPlayerHandler);
@@ -54,7 +65,7 @@ int main()
         std::cout << "Entering lobby...\n";
         lobbyTimer();
         std::cout << "Starting game...\n";
-        char winner = hangman(distr, gen);
+        char winner = hangman(distr(gen));
         sleep(1);
         (winner=='r') ? std::cout << "==Winning team: Red==\n" : std::cout << "==Winning team: Blue==\n";
         std::cout << "Announcing to players...\n";

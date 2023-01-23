@@ -12,7 +12,7 @@ void setReuseAddr(int socket){
 }
 
 
-void createServer() {
+void createServer(long PORT) {
     serverSock = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSock < 0)
     {

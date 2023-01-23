@@ -58,6 +58,18 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
         if(count < 1){
             std::cout << "[L]Error: Message shorter than 1\n";
             letterPoll[position].revents |= POLLERR;
+            std::cout << "[L]Removing player with fd=" << clientFd << std::endl;
+            letterPoll[position] = letterPoll[letterPollCount-1];
+            letterPollCount--;
+            auto it = find(Players.begin(), Players.end(), clientFd);
+            if (it != Players.end()){
+            int index = it - Players.begin();
+            Players.erase(Players.begin()+index);
+            Names.erase(Names.begin()+index);
+            Points.erase(Points.begin()+index);
+        }
+        shutdown(clientFd, SHUT_RDWR);
+        close(clientFd);
         }
         else {
             std::string letterMsg(buffer);

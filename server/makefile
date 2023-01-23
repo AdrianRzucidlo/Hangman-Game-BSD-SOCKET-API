@@ -1,7 +1,7 @@
 CC=g++
 CPPFLAGS=-Wall -Wextra -c
 
-all: hangman
+all: hangman clean
 
 hangman: sources/server.o \
 sources/newPlayerHandler.o \

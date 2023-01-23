@@ -14,7 +14,6 @@ void acceptLetters(char team){
     int playerCount = Players.size();
 
     for(int i = 0; i < playerCount; ++i){
-        //semafor?
         letterPoll[i].fd=Players[i];
         letterPoll[i].events=POLLIN;
         letterPollCount++;
@@ -24,7 +23,6 @@ void acceptLetters(char team){
         if(inLobby){
             return;
         }
-        //dodać reakcję poll na serwerowy socket?
         std::cout << "[L]Polling...\n";
         ready = poll(letterPoll, letterPollCount, -1);
         if(inLobby){

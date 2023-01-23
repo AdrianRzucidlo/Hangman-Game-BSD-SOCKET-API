@@ -8,7 +8,6 @@
 #include <chrono>
 
 #define MAX_PLAYERS_PER_TEAM 32
-#define PORT 8090
 #define MAX_USERS 64;
 //extern const int PORT;
 //extern const int MAX_USERS;

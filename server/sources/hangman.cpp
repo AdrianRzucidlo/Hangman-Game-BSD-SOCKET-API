@@ -9,9 +9,10 @@
 #include "../headers/globalVariables.hh"
 #include <iostream>
 #include <fstream>
-std::string getAPhrase(std::uniform_int_distribution<> dist, std::mt19937 gen){
-    
-    int lineN = dist(gen);
+
+#define ROUND_TIME 15000
+
+std::string getAPhrase(int lineN){
 
     std::string line;
     std::ifstream file("./phrases.txt");
@@ -78,7 +79,7 @@ void clearVotes(int* votes){
     return;
 }
 
-char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
+char hangman(int phraseLineNum){
     inLobby = false;
     std::cout << "::Starting letter poll threads\n";
     std::thread playerLetterThreadRed(acceptLetters, 'r');
@@ -87,7 +88,7 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
     playerLetterThreadRed.detach();
     playerLetterThreadBlu.detach();
     std::cout << "::Generating secret phrase\n";
-    phrase = getAPhrase(dist, gen);
+    phrase = getAPhrase(phraseLineNum);
     int len = phrase.length();
 
     std::cout << "::Preparing variables\n";
@@ -145,9 +146,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
         redMostVotedIdx = mostVotes(redAlphabet);
         bluMostVotedIdx = mostVotes(bluAlphabet);
         if(redMostVotedIdx == -1){
-            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() < 15000) continue;
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() < ROUND_TIME) continue;
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() >= 15000 || 
+        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() >= ROUND_TIME || 
            redReceivedVotes == (int) redPlayers.size() || 
            redAlphabet[redMostVotedIdx] >= (int) redPlayers.size()){
 
@@ -172,9 +173,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
             redRoundStart = std::chrono::steady_clock::now();
         }
         if(bluMostVotedIdx == -1){
-            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() < 15000) continue;
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() < ROUND_TIME) continue;
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() >= 15000 || 
+        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() >= ROUND_TIME || 
            bluReceivedVotes == (int) bluPlayers.size() ||
            bluAlphabet[bluMostVotedIdx] >= (int) bluPlayers.size()){
             

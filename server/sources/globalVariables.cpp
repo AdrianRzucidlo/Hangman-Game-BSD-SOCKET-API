@@ -6,7 +6,6 @@
 #include <random>
 
 #define MAX_PLAYERS_PER_TEAM 32
-#define PORT 8090
 #define MAX_USERS 64;
 // const int PORT = 8090;
 // const int MAX_USERS = 64;

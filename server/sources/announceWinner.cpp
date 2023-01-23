@@ -6,7 +6,7 @@
 #include <iostream>
 
 void announceWinner(char winner){
-    std::string code= (winner='r') ? "501/" : "502/";
+    std::string code= (winner='r') ? "501" : "502";
     
     std::string bestFromWinners;
     std::string bestFromLosers;
