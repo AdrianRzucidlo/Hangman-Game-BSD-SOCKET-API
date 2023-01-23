@@ -63,13 +63,13 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
             letterPollCount--;
             auto it = find(Players.begin(), Players.end(), clientFd);
             if (it != Players.end()){
-            int index = it - Players.begin();
-            Players.erase(Players.begin()+index);
-            Names.erase(Names.begin()+index);
-            Points.erase(Points.begin()+index);
-        }
-        shutdown(clientFd, SHUT_RDWR);
-        close(clientFd);
+                int index = it - Players.begin();
+                Players.erase(Players.begin()+index);
+                Names.erase(Names.begin()+index);
+                Points.erase(Points.begin()+index);
+            }
+            shutdown(clientFd, SHUT_RDWR);
+            close(clientFd);
         }
         else {
             std::string letterMsg(buffer);

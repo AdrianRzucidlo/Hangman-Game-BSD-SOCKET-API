@@ -39,6 +39,12 @@ void newPlayerHandler(){
                 inet_ntoa(clientAddr.sin_addr) <<":"<< 
                 ntohs(clientAddr.sin_port) << "  FD: " << 
                 newPlayer << std::endl;
+
+                if(letterPollCountBlu+letterPollCountRed >= MAX_PLAYERS_PER_TEAM){
+                    auto ret = write(newPlayer, "444;", 4);
+                    if(ret==-1) error(1, errno, "write failed on descriptor %d", newPlayer);
+                    if(ret!=4) error(0, errno, "wrote less than requested to descriptor %d (%ld/%d)", newPlayer, ret, 4);
+                }
                 std::cout << "::Confirming connection\n";
                 confirmConnection(newPlayer);
                 std::cout << "::Reading Name\n";

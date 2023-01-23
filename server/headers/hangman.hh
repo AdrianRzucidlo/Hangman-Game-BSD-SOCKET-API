@@ -8,5 +8,6 @@ std::string getAPhrase(int);
 char hangman(int);
 void informAboutStart();
 void acceptLetters(char);
+void disconnectPlayers();
 
 #endif

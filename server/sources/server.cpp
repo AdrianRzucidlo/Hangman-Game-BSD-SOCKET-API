@@ -70,7 +70,8 @@ int main(int argc, char ** argv){
         (winner=='r') ? std::cout << "==Winning team: Red==\n" : std::cout << "==Winning team: Blue==\n";
         std::cout << "Announcing to players...\n";
         announceWinner(winner);
-        std::cout << "Game loop finished, pausing game thread for 15 seconds\n\n";
+        std::cout << "Game loop finished, disconnection players...\n";
+        disconnectPlayers();
         sleep(15);
     }
 
