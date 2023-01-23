@@ -56,6 +56,7 @@ void newPlayerHandler(){
                 else team = 'r';
 
                 name.erase(std::remove(name.begin(), name.end(), '\n'), name.cend());
+                std::cout << "::Received Name: " << name << std::endl;
                 if(nameTaken(name)){
                     std::cout << "::Rejecting Name\n";
                     confirmName(newPlayer, team, false);
