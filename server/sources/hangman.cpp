@@ -83,6 +83,8 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
     std::thread playerLetterThreadRed(acceptLetters, 'r');
     std::thread playerLetterThreadBlu(acceptLetters, 'b');
 
+    playerLetterThreadRed.detach();
+    playerLetterThreadBlu.detach();
     std::cout << ":::Generating secret phrase\n";
     phrase = getAPhrase(dist, gen);
     int len = phrase.length();
@@ -132,9 +134,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
         redMostVotedIdx = mostVotes(redAlphabet);
         bluMostVotedIdx = mostVotes(bluAlphabet);
         if(redMostVotedIdx == -1){
-            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() < 15000) continue;
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() < 3000) continue;
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() >= 15000 || 
+        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - redRoundStart).count() >= 3000 || 
            redReceivedVotes == (int) redPlayers.size() || 
            redAlphabet[redMostVotedIdx] >= (int) redPlayers.size()){
 
@@ -159,9 +161,9 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
             redRoundStart = std::chrono::steady_clock::now();
         }
         if(bluMostVotedIdx == -1){
-            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() < 15000) continue;
+            if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() < 3000) continue;
         }
-        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() >= 15000 || 
+        if(std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - bluRoundStart).count() >= 3000 || 
            bluReceivedVotes == (int) bluPlayers.size() ||
            bluAlphabet[bluMostVotedIdx] >= (int) bluPlayers.size()){
             
@@ -183,7 +185,18 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
             bluRoundNext.detach();
             bluRoundStart = std::chrono::steady_clock::now();
         }
+        std::cout << "Sprawdzamy koniec:\n";
+        if(redPlayers.empty() || lettersLeftBlu.empty()){
+            std::cout << "red empty or letter blu:\n";
+
+            return 'b';
+        }
+        if(bluPlayers.empty() || lettersLeftRed.empty()){
+            std::cout << "blu empty or letter red:\n";
+            return 'r';
+        }
     }
+    std::cout << "Out of loop:\n";
     if(redHangman >= 8) return 'b';
     else return 'r';
    

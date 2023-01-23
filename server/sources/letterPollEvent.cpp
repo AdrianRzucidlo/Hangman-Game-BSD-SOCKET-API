@@ -27,7 +27,6 @@ void givePoint(int clientFd, char team){
 void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, char team){
     int clientFd = letterPoll[position].fd;
     short int revents = letterPoll[position].revents;
-    //std::cout << "LetterPoll\n";
 
     std::vector<int>& Players = (team=='r') ? redPlayers : bluPlayers;
     std::vector<int>& Points = (team=='r') ? redPoints : bluPoints;
@@ -53,11 +52,11 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
         char buffer[255];
         //MESSAGE
         int count = read(clientFd, buffer, 255);
+        std::cout << buffer[0] << "u" << count << std::endl;
         if(count < 1){
             revents |= POLLERR;
         }
         else {
-            //Get message, remove new line
             std::string letterMsg(buffer);
 
             letterMsg.erase(std::remove(letterMsg.begin(), letterMsg.end(), '\n'), letterMsg.cend());

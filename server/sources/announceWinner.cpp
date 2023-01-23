@@ -5,7 +5,7 @@
 #include <error.h>
 
 void announceWinner(char winner){
-    std::string code="500/";
+    std::string code= (winner='r') ? "501/" : "502/";
     
     std::string bestFromWinners;
     std::string bestFromLosers;

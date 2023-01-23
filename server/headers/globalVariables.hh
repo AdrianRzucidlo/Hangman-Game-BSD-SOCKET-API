@@ -13,9 +13,7 @@
 //extern const int PORT;
 //extern const int MAX_USERS;
 
-// extern std::random_device rd;
-// extern std::mt19937 gen(rd());
-// extern std::uniform_int_distribution<> dist(0, 212);
+
 extern bool inLobby;
 extern int serverSock;
 extern pollfd letterPollRed[MAX_PLAYERS_PER_TEAM];
