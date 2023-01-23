@@ -1,5 +1,5 @@
 #include <iostream>
-#include <../headers/globalVariables.hh>
+#include "../headers/globalVariables.hh"
 #include <sys/socket.h>
 #include <unistd.h>
 
