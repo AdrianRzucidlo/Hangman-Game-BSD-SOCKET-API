@@ -55,10 +55,11 @@ int main()
         lobbyTimer();
         std::cout << "Starting game...\n";
         char winner = hangman(distr, gen);
-        std::cout << "Uwu";
-        (winner=='r') ? std::cout << "Winning team: Red\n" : std::cout << "Winning team: Blue\n";
+        (winner=='r') ? std::cout << "==Winning team: Red==\n" : std::cout << "==Winning team: Blue==\n";
         std::cout << "Announcing to players...\n";
         announceWinner(winner);
+        std::cout << "Game loop finished, pausing game thread for 10 seconds\n\n";
+        sleep(10);
     }
 
 }

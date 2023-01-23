@@ -26,7 +26,6 @@ void givePoint(int clientFd, char team){
 
 void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, char team){
     int clientFd = letterPoll[position].fd;
-    short int revents = letterPoll[position].revents;
 
     std::vector<int>& Players = (team=='r') ? redPlayers : bluPlayers;
     std::vector<int>& Points = (team=='r') ? redPoints : bluPoints;
@@ -34,7 +33,10 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
     std::set<char>& lettersLeft = (team=='r') ? lettersLeftRed : lettersLeftBlu;
     std::vector<char>& guesses = (team=='r') ? redGuesses : bluGuesses;
     int& roundCounter = (team=='r') ? redRoundCounter : bluRoundCounter;
-    if(revents & ~POLLIN){
+
+    std::cout << "[L]Revents value: " << letterPoll[position].revents << std::endl;
+
+    if(letterPoll[position].revents & ~POLLIN){
         std::cout << "[L]Removing player with fd=" << clientFd << std::endl;
         letterPoll[position] = letterPoll[letterPollCount-1];
         letterPollCount--;
@@ -48,13 +50,14 @@ void letterPollEvent(int position, pollfd *letterPoll, int& letterPollCount, cha
         shutdown(clientFd, SHUT_RDWR);
         close(clientFd);
     }
-    if(revents & POLLIN){
+    if(letterPoll[position].revents & POLLIN){
         char buffer[255];
         //MESSAGE
         int count = read(clientFd, buffer, 255);
-        std::cout << buffer[0] << "u" << count << std::endl;
+
         if(count < 1){
-            revents |= POLLERR;
+            std::cout << "[L]Error: Message shorter than 1\n";
+            letterPoll[position].revents |= POLLERR;
         }
         else {
             std::string letterMsg(buffer);

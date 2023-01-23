@@ -21,13 +21,17 @@ void acceptLetters(char team){
     }
     int ready;
     while(1){
+        if(inLobby){
+            return;
+        }
         //dodać reakcję poll na serwerowy socket?
+        std::cout << "[L]Polling...\n";
         ready = poll(letterPoll, letterPollCount, -1);
 
         if(ready == -1){
             error(0, errno, "poll failed");
         }
-
+        std::cout << "[L]Event detected: " << ready << std::endl;
         for (int i = 0; i < letterPollCount && ready > 0; ++i){
             if(letterPoll[i].revents){
                 letterPollEvent(i, letterPoll, letterPollCount, team);

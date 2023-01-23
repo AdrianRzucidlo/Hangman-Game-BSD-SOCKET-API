@@ -79,16 +79,18 @@ void clearVotes(int* votes){
 }
 
 char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
-    std::cout << ":::Starting letter poll threads\n";
+    inLobby = false;
+    std::cout << "::Starting letter poll threads\n";
     std::thread playerLetterThreadRed(acceptLetters, 'r');
     std::thread playerLetterThreadBlu(acceptLetters, 'b');
 
     playerLetterThreadRed.detach();
     playerLetterThreadBlu.detach();
-    std::cout << ":::Generating secret phrase\n";
+    std::cout << "::Generating secret phrase\n";
     phrase = getAPhrase(dist, gen);
     int len = phrase.length();
 
+    std::cout << "::Preparing variables\n";
     int redAlphabet[26]; //+97 = a
     int bluAlphabet[26];
     int redHangman = 0;
@@ -107,15 +109,17 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
         lettersLeftBlu.insert(phrase[i]);
         lettersLeftRed.insert(phrase[i]);
     }
-
+    std::cout << "::Informing about game start\n";
     informAboutStart();
 
+    std::cout << "::Initializaing timer\n";
     redRoundStart = std::chrono::steady_clock::now();
     bluRoundStart = redRoundStart;
     std::chrono::steady_clock::time_point currentTime = std::chrono::steady_clock::now();
 
     bluRoundCounter = 1;
     redRoundCounter = 1;
+    std::cout << "::Starting game\n";
     while(redHangman < 8 && bluHangman < 8) {
         currentTime = std::chrono::steady_clock::now();
         while(!redGuesses.empty()) {
@@ -185,20 +189,25 @@ char hangman(std::uniform_int_distribution<> dist, std::mt19937 gen){
             bluRoundNext.detach();
             bluRoundStart = std::chrono::steady_clock::now();
         }
-        std::cout << "Sprawdzamy koniec:\n";
-        if(redPlayers.empty() || lettersLeftBlu.empty()){
-            std::cout << "red empty or letter blu:\n";
 
+        if(redPlayers.empty() || lettersLeftBlu.empty()){
+            std::cout << "::Blue victory conditions met\n";
             return 'b';
         }
         if(bluPlayers.empty() || lettersLeftRed.empty()){
-            std::cout << "blu empty or letter red:\n";
+            std::cout << "::Red victory conditions met\n";
             return 'r';
         }
     }
-    std::cout << "Out of loop:\n";
-    if(redHangman >= 8) return 'b';
-    else return 'r';
+    
+    inLobby = true;
+    if(redHangman >= 8) {
+        std::cout << "::Hangman built by Red team\n";
+        return 'b';
+    } else {
+        std::cout << "::Hangman built by Blue team\n";
+        return 'r';
+    }
    
 
 }

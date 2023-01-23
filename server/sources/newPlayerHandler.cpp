@@ -66,7 +66,7 @@ void newPlayerHandler(){
                 std::cout << "::Confirming Name\n";
                 confirmName(newPlayer, team);
 
-                std::cout << "::Adding player to letter poll\n";
+                std::cout << "::Adding player to letter poll and player list\n";
                 pollfd *letterPoll = (team=='r') ? letterPollRed : letterPollBlu;
                 int& letterPollCount = (team=='r') ? letterPollCountRed : letterPollCountBlu;
                 if(team=='b') {
@@ -81,8 +81,6 @@ void newPlayerHandler(){
                 letterPoll[letterPollCount].fd=newPlayer;
                 letterPoll[letterPollCount].events=POLLIN;
                 letterPollCount++;
-
-                
             }
         }
     }
