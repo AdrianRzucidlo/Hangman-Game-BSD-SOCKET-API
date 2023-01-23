@@ -14,6 +14,7 @@ sources/createServer.o \
 sources/confirmName.o \
 sources/confirmConnection.o \
 sources/announceWinner.o \
+sources/disconnectPlayers.o \
 sources/acceptLetters.o
 	$(CC) $^ -pthread -o $@
 
