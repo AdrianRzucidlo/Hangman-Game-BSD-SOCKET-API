@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Hangman
+Comment=THis is hangman game
+Exec=Hangmanclient
+Icon=hangman
