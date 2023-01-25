@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 
-#define ROUND_TIME 10000
+#define ROUND_TIME 15000
 
 std::string getAPhrase(int lineN){
 
